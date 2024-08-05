@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./src:/app/src
+    environment:
+      - DATABASE_URL=postgresql://postgres:123456@db:5432/pms
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+      - db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - '6379:6379'
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: pms
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pms.com
+      PGADMIN_DEFAULT_PASSWORD: 123456
+    ports:
+      - '8080:80'
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
